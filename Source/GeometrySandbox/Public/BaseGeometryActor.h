@@ -15,7 +15,7 @@ enum class EMovementType : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FGeometryData 
+struct FGeometryData
 {
 	GENERATED_USTRUCT_BODY()
 	UPROPERTY(EditAnywhere, Category = "Movement")
@@ -26,7 +26,15 @@ struct FGeometryData
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	EMovementType MoveType = EMovementType::Static;
+
+	UPROPERTY(EditAnywhere, Category = "Design")
+	FLinearColor Color = FLinearColor::Black;
+
+	UPROPERTY(EditAnywhere, Category = "Design")
+	float TimerRate = 3.0f;
+
 };
+
 UCLASS()
 class GEOMETRYSANDBOX_API ABaseGeometryActor : public AActor
 {
@@ -38,6 +46,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* BaseMesh;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -64,7 +73,16 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 private:
+	const int32 MaxTimerCount = 5;
+	int32 TimerCount = 0;
+
+
 	void printTypes();
 	void printTransform();
 	FVector InitialLocation;
+	FTimerHandle TimerHandle;
+
+	void SetColor(const FLinearColor& Color);
+
+	void OnTimerFired();
 };

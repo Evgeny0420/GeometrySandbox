@@ -2,6 +2,8 @@
 
 
 #include "BaseGeometryActor.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "TimerManager.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseGeometry, All, All);
 
@@ -22,6 +24,9 @@ void ABaseGeometryActor::BeginPlay()
 
 	InitialLocation = GetActorLocation();
 
+	SetColor(GeometryData.Color);
+
+	GetWorldTimerManager().SetTimer(TimerHandle, this, &ABaseGeometryActor::OnTimerFired, GeometryData.TimerRate, true);
 	// printTypes();
 	// printTransform();
 }
@@ -74,3 +79,26 @@ void ABaseGeometryActor::printTransform()
 	UE_LOG(LogBaseGeometry, Error, TEXT("Human transform %s"), *Transform.ToHumanReadableString());
 }
 
+void ABaseGeometryActor::SetColor(const FLinearColor& Color)
+{
+	UMaterialInstanceDynamic* DynMaterial = BaseMesh->CreateAndSetMaterialInstanceDynamic(0);
+	if (DynMaterial)
+	{
+		DynMaterial->SetVectorParameterValue("Color", Color);
+	}
+}
+
+void ABaseGeometryActor::OnTimerFired()
+{
+	if (++TimerCount <= MaxTimerCount)
+	{
+		const FLinearColor NewColor = FLinearColor::MakeRandomColor();
+		UE_LOG(LogBaseGeometry, Display, TEXT("Color to set up %s"), *NewColor.ToString());
+		SetColor(NewColor);
+	}
+	else
+	{
+		GetWorldTimerManager().ClearTimer(TimerHandle);
+	}
+	
+}
